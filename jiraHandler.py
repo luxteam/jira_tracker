@@ -50,7 +50,7 @@ def getJiraBugIssues(project):
 	for issue in issues_list:
 		issueInfo = getIssueInfo(issue)
 
-		if issueInfo['key'] != "STVCIS-973":
+		if issueInfo['key'] != "STVCIS-973" and issueInfo['fields']['status']['name'] != 'Closed':
 			try:
 				severity = getSeverity(issueInfo)
 			except:

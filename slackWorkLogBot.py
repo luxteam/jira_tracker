@@ -77,12 +77,12 @@ def monitoring():
 			now = datetime.datetime.now()
 
 			if weekday in range(0, 5) and now.hour == 7 and now.minute == 0:
-				send(config.cis_support_url, payload=createJiraReport(diff=False))
+				send(config.webhook_url, payload=createJiraReport(diff=False))
 				time.sleep(600)
 			
 			slack_report = createJiraReport()
 			if slack_report:
-				send(config.webhook_test, payload=slack_report)
+				send(config.webhook_url, payload=slack_report)
 			time.sleep(300)
 		except Exception as ex:
 			sendDirectMessage(ex)
