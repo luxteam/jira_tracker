@@ -49,8 +49,8 @@ def createSlackReport(json):
 	tickets = []
 
 	for ticket in json:
-		message = "*Reporter*: {}\n*Priority*: {}\n*Severity*: {}\n*Link*: {}\n".format(json[ticket]['reporter'], json[ticket]['priority'], \
-			json[ticket]['severity'], json[ticket]['link'])
+		message = "*Reporter*: {}\n*Priority*: {}\n*Status*: {}\n*Link*: {}\n".format(json[ticket]['reporter'], json[ticket]['priority'], \
+			json[ticket]['status'], json[ticket]['link'])
 		tickets.append({"title": "[{}] {}".format(json[ticket]['key'], json[ticket]['summary']) , "value": message, "short": False})
 
 	report["color"] = "#00ffff"
@@ -83,9 +83,9 @@ def monitoring():
 			slack_report = createJiraReport()
 			if slack_report:
 				send(config.webhook_url, payload=slack_report)
-			time.sleep(300)
+			time.sleep(60)
 		except Exception as ex:
-			sendDirectMessage(ex)
+			sendDirectMessage(str(ex))
 
 
 if __name__ == "__main__":

@@ -36,12 +36,6 @@ def getIssueInfo(ticket):
 	return issueInfo
 
 
-def getSeverity(issueInfo):
-	severity_id = issueInfo['fields']['customfield_46987']['id']
-	severity_id_dict = {'48081': 'Critical', '48082': 'Major', '48085': 'Normal', '48083': 'Minor', '48084': 'Trivial'}
-	return severity_id_dict[severity_id]
-
-
 # return all jira tickets with epic bug
 def getJiraBugIssues(project):
 	jql = "project = {} AND 'Epic Link' = STVCIS-973".format(project)
@@ -52,17 +46,13 @@ def getJiraBugIssues(project):
 
 		if issueInfo['key'] != "STVCIS-973" and issueInfo['fields']['status']['name'] != 'Closed':
 			try:
-				severity = getSeverity(issueInfo)
-			except:
-				severity = 'unknown'
-
-			try:
 				issue_url = 'https://adc.luxoft.com/jira/browse/{}'.format(issueInfo['key'])
 			except:
 				issue_url = 'unknown'
 
-			issue_dict = {'key': issueInfo['key'], 'summary': issueInfo['fields']['summary'], 'priority': issueInfo['fields']['priority']['name'], 'severity': severity, \
-			'reporter': issueInfo['fields']['reporter']['displayName'], 'link': issue_url}
+			issue_dict = {'key': issueInfo['key'], 'summary': issueInfo['fields']['summary'], \
+				'priority': issueInfo['fields']['priority']['name'], 'status': issueInfo['fields']['status']['name'], \
+				'reporter': issueInfo['fields']['reporter']['displayName'], 'link': issue_url}
 
 			report[issueInfo['key']] = issue_dict
 
