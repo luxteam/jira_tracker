@@ -70,7 +70,7 @@ def monitoring():
 		try:
 			slack_report = createJiraReport()
 			if slack_report:
-				send(config.webhook_test, payload=slack_report)
+				send(config.webhook_url, payload=slack_report)
 			time.sleep(600)
 		except Exception as ex:
 			sendDirectMessage(str(ex))
