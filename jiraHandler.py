@@ -38,7 +38,7 @@ def getIssueInfo(ticket):
 
 
 def getJiraTickets(project):
-	jql = "project = {} AND 'Epic Link' = STVCIS-973 OR 'Epic Link' = STVCIS-1381".format(project)
+	jql = "project = {} AND 'Epic Link' = STVCIS-973 OR 'Epic Link' = STVCIS-1386".format(project)
 	issues_list = getIssuesListFronJQL(jql)
 	report = {}
 	for issue in issues_list:
