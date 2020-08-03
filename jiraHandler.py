@@ -2,6 +2,7 @@ import time
 import config
 import requests
 import datetime
+
 from jira import JIRA
 
 
@@ -36,21 +37,29 @@ def getIssueInfo(ticket):
 	return issueInfo
 
 
-# return all jira tickets with epic bug
-def getJiraBugIssues(project):
-	jql = "project = {} AND 'Epic Link' = STVCIS-973".format(project)
+def getJiraTickets(project):
+	jql = "project = {} AND 'Epic Link' = STVCIS-973 OR 'Epic Link' = STVCIS-1381".format(project)
 	issues_list = getIssuesListFronJQL(jql)
 	report = {}
 	for issue in issues_list:
 		issueInfo = getIssueInfo(issue)
 
-		if issueInfo['key'] != "STVCIS-973" and issueInfo['fields']['status']['name'] != 'Closed':
+		if issueInfo['key'] != "STVCIS-973" and issueInfo['key'] != "STVCIS-1381" and issueInfo['fields']['status']['name'] != 'Closed':
 			try:
 				issue_url = 'https://adc.luxoft.com/jira/browse/{}'.format(issueInfo['key'])
 			except:
 				issue_url = 'unknown'
 
-			issue_dict = {'key': issueInfo['key'], 'summary': issueInfo['fields']['summary'], \
+			try:
+				epic = issueInfo['fields']['customfield_42980']
+				if "STVCIS-973" in epic:
+					epic = "CIS Bug"
+				elif "STVCIS-1381" in epic:
+					epic = "User Request"
+			except:
+				epic = "unknown"
+
+			issue_dict = {'key': issueInfo['key'], 'summary': issueInfo['fields']['summary'], 'epic': epic, \
 				'priority': issueInfo['fields']['priority']['name'], 'status': issueInfo['fields']['status']['name'], \
 				'reporter': issueInfo['fields']['reporter']['displayName'], 'link': issue_url}
 

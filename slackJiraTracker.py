@@ -3,53 +3,50 @@ import time
 import json
 import datetime
 import operator
+import traceback
 
 import config
 from webhookHandler import send
-from jiraHandler import getJiraBugIssues
+from jiraHandler import getJiraTickets
 
 
-def createJiraReport(project="STVCIS", diff=True):
+def createJiraReport():
 
-	slack_report_json = {}
+	slack_report_dict = {}
 
-	current_issues_json = "current_issues.json"
+	known_tickets_file = "current_issues.json"
 
-	if os.path.exists(current_issues_json):
-		with open(current_issues_json, 'r') as f:
-			current_issues = json.load(f)
+	if os.path.exists(known_tickets_file):
+		with open(known_tickets_file, 'r') as f:
+			known_issues = json.load(f)
 	else:
-		current_issues = {}
+		known_issues = {}
 
+	jira_tickets = getJiraTickets(config.project)
 
-	all_jira_issues = getJiraBugIssues(project)
+	for ticket, summary in jira_tickets.items():
+		if not ticket in known_issues:
+			slack_report_dict[ticket], known_issues[ticket] = summary, summary
 
-	if diff:
-		for issue in all_jira_issues:
-			if not issue in current_issues:
-				slack_report_json[issue] = all_jira_issues[issue]
-				current_issues[issue] = all_jira_issues[issue]
-		with open(current_issues_json, 'w') as f:
-			json.dump(current_issues, f)
-	else:
-		slack_report_json = all_jira_issues
+	with open(known_tickets_file, 'w') as f:
+		json.dump(known_issues, f)
 
 	slack_report = {}
 
-	if slack_report_json:
-		slack_report["attachments"] = [createSlackReport(slack_report_json)]
+	if slack_report_dict:
+		slack_report["attachments"] = [createSlackReport(slack_report_dict)]
 
 	return slack_report
 
 
 def createSlackReport(json):
 	report = {}
-	report["title"] = "Jira issues"
+	report["title"] = "Jira tracker"
 
 	tickets = []
 
 	for ticket in json:
-		message = "*Reporter*: {}\n*Priority*: {}\n*Status*: {}\n*Link*: {}\n".format(json[ticket]['reporter'], json[ticket]['priority'], \
+		message = "*Epic*: {}\n*Reporter*: {}\n*Priority*: {}\n*Status*: {}\n*Link*: {}\n".format(json[ticket]['epic'], json[ticket]['reporter'], json[ticket]['priority'], \
 			json[ticket]['status'], json[ticket]['link'])
 		tickets.append({"title": "[{}] {}".format(json[ticket]['key'], json[ticket]['summary']) , "value": message, "short": False})
 
@@ -69,23 +66,15 @@ def sendDirectMessage(text):
 
 def monitoring():
 
-	sendDirectMessage("Jira issue tracking was started!")	
-
 	while True:
 		try:
-			weekday = datetime.datetime.today().weekday()
-			now = datetime.datetime.now()
-
-			if weekday in range(0, 5) and now.hour == 7 and now.minute == 0:
-				send(config.webhook_url, payload=createJiraReport(diff=False))
-				time.sleep(600)
-			
 			slack_report = createJiraReport()
 			if slack_report:
-				send(config.webhook_url, payload=slack_report)
-			time.sleep(60)
+				send(config.webhook_test, payload=slack_report)
+			time.sleep(600)
 		except Exception as ex:
 			sendDirectMessage(str(ex))
+			#traceback.print_exc()
 
 
 if __name__ == "__main__":
