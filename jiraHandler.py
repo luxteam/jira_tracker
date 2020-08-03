@@ -44,7 +44,7 @@ def getJiraTickets(project):
 	for issue in issues_list:
 		issueInfo = getIssueInfo(issue)
 
-		if issueInfo['key'] != "STVCIS-973" and issueInfo['key'] != "STVCIS-1381" and issueInfo['fields']['status']['name'] != 'Closed':
+		if issueInfo['key'] != "STVCIS-973" and issueInfo['key'] != "STVCIS-1386" and issueInfo['fields']['status']['name'] != 'Closed':
 			try:
 				issue_url = 'https://adc.luxoft.com/jira/browse/{}'.format(issueInfo['key'])
 			except:
@@ -54,7 +54,7 @@ def getJiraTickets(project):
 				epic = issueInfo['fields']['customfield_42980']
 				if "STVCIS-973" in epic:
 					epic = "CIS Bug"
-				elif "STVCIS-1381" in epic:
+				elif "STVCIS-1386" in epic:
 					epic = "User Request"
 			except:
 				epic = "unknown"
